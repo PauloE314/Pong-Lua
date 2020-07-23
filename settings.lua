@@ -1,11 +1,21 @@
 settings = {
-    width = {
-        real = 1280,
-        virtual = 432
+    screen = {
+        real = {
+            width = 1280,
+            height = 720
+        },
+        virtual = {
+            width = 432,
+            height = 243
+        }
     },
-    height = {
-        real = 720,
-        virtual = 243
+    paddles = {
+        width = 5,
+        height = 40
+    },
+    ball = {
+        width = 5,
+        height = 5
     }
 }
 
