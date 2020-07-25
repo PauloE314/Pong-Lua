@@ -85,6 +85,23 @@ function love.update(dt)
     -- Checa os controles de cada um
     paddle_1:controls(virtual.height)
     paddle_2:controls(virtual.height)
+
+    -- Colisão com paddles
+    if ball:collide_object(paddle_1) or ball:collide_object(paddle_2) then
+        ball:invert_x() 
+    end
+
+    
+    -- Colisão com paredes
+    -- Verticais
+    if ball.y <= 0 or ball.y + ball.height >= virtual.height then
+        ball:invert_y()
+    end
+
+    -- Adiciona pontuação caso a bolinha acerte as paredes horizontais
+    if ball.x <= 0 or ball.x + ball.width >= virtual.width then
+        
+    end
     
     -- Atualiza a bolinha
     if STATE == 'playing' then

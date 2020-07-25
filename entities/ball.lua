@@ -26,6 +26,31 @@ function Ball:update(dt, windows_height)
     self.y = self.y + self.y_speed * dt
 end
 
+-- Checa a colisão da bolinha com um objeto
+function Ball:collide_object(rect)
+    -- Colisão horizontal
+    if self.x > rect.x + rect.width or self.x + self.width < rect.x then
+        return false
+    end
+    -- Colisão vertical
+    if self.y > rect.y + rect.height or self.y + self.height < rect.y then
+        return false
+    end
+
+    return true
+end
+
+
+-- Inverte o eixo x da bolinha
+function Ball:invert_x()
+   self.x_speed = -self.x_speed 
+end
+
+-- Inverte o eixo y da bolinha
+function Ball:invert_y()
+    self.y_speed = -self.y_speed
+end
+
 
 -- Renderiza a bolinha em tela
 function Ball:render()
