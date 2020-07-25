@@ -16,7 +16,14 @@ settings = {
     ball = {
         width = 5,
         height = 5
-    }
+    },
+    states = {
+        begin = 'a',
+        playing = 'b',
+        serve = 'c',
+        win = 'd'
+    },
+    win_points = 2
 }
 
 return settings

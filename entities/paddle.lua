@@ -9,6 +9,7 @@ function Paddle:init(data)
     self.height = data.height
     self.up_key = data.up_key
     self.down_key = data.down_key
+    self.points = 0
 
     self.y_speed = 0
 end
@@ -36,6 +37,11 @@ function Paddle:controls(speed)
     else
         self.y_speed = 0
     end
+end
+
+-- Adiciona a pontuação do jogador
+function Paddle:increase_point()
+    self.points = self.points + 1
 end
 
 -- Renderiza o paddle em tela
