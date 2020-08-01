@@ -9,7 +9,8 @@ function Ball:init(data)
     self.width = data.width
     self.height = data.height
     -- Gera a velocidade inicial da bolinha aleatoriamente
-    self.x_speed = math.random(2) == 1 and 100 or -100
+    -- self.x_speed = math.random(2) == 1 and 100 or -100
+    self.x_speed = -100
     self.y_speed = math.random(50, -50)
 end
 

@@ -4,25 +4,38 @@
 
 -- Configurações da aplicação
 settings = require("settings")
+
 -- Importação de libs
 Class = require("libs/class")
 push = require("libs/push")
+
 -- Importação de entidades
 require "entities/paddle"
 require "entities/ball"
-
 
 -- Dimensões
 real = settings.screen.real
 virtual = settings.screen.virtual
 paddles = settings.paddles
+
+-- Estados e pontos de vitória
 states = settings.states
 winning_points = settings.win_points
+
+
 
 -- Função de setup da aplicação
 function love.load()
     -- Seed
     math.randomseed(os.time())
+
+    -- Sons
+    sounds = {
+        paddle_hit = love.audio.newSource('resources/paddle_hit.wav', 'static'),
+        lose_hit = love.audio.newSource('resources/lose_hit.wav', 'static'),
+        wall_hit = love.audio.newSource('resources/wall_hit.wav', 'static'),
+        end_game = love.audio.newSource('resources/end_game.wav', 'static')
+    }
     
     -- Faz as arestas não ficarem arredondadas
     love.graphics.setDefaultFilter('nearest', 'nearest')
@@ -97,14 +110,20 @@ function love.update(dt)
     paddle_2:controls(virtual.height)
 
 
-    -- Checa se o jogo ainda está valendo
-    if paddle_1.points >= winning_points then
-        game_state = states.win
-        winner = '1'
+    if game_state == states.serve then
+        -- Checa se o jogo ainda está valendo
+        if paddle_1.points >= winning_points then
+            game_state = states.win
+            winner = '1'
+            -- Som de fim do jogo
+            sounds.end_game:play()
 
-    elseif paddle_2.points >= winning_points then
-        game_state = states.win
-        winner = '2'
+        elseif paddle_2.points >= winning_points then
+            game_state = states.win
+            winner = '2'
+            -- Som de fim do jogo
+            sounds.end_game:play()
+        end
     end
     
     -- Lógica de funcionamento da bolinha
@@ -112,12 +131,16 @@ function love.update(dt)
         -- Paddle 1
         if ball:collide_object(paddle_1) then
             ball:invert_x()
-            ball.x = paddle_1.x + paddle_1.width 
+            ball.x = paddle_1.x + paddle_1.width
+            -- Som
+            sounds.paddle_hit:play()
 
         -- Paddle 2
         elseif ball:collide_object(paddle_2) then
             ball:invert_x()
             ball.x = paddle_2.x - (paddle_2.width + ball.width)
+            -- Som
+            sounds.paddle_hit:play()
         end
 
         
@@ -126,10 +149,14 @@ function love.update(dt)
         if ball.y <= 0 then
             ball:invert_y()
             ball.y = 0
+            -- Som
+            sounds.wall_hit:play()
         -- Borda inferior
         elseif ball.y + ball.height > virtual.height then
             ball:invert_y()
             ball.y = virtual.height - ball.height
+            -- Som
+            sounds.wall_hit:play()
         end
 
 
@@ -141,6 +168,10 @@ function love.update(dt)
             ball:reset(virtual.width, virtual.height, turn)
             -- Adiciona a pontuação do jogador 2
             paddle_2:increase_point()
+            -- Som
+            if paddle_2.points < winning_points then
+                sounds.lose_hit:play()
+            end
         elseif ball.x + ball.width >= virtual.width then
             turn = '1'
             -- Restart
@@ -148,6 +179,10 @@ function love.update(dt)
             ball:reset(virtual.width, virtual.height, turn)
             -- Adiciona a pontuação do jogador 1
             paddle_1:increase_point()
+            -- Som
+            if paddle_1.points < winning_points then
+                sounds.lose_hit:play()
+            end
         end
         
         ball:update(dt)
@@ -183,7 +218,10 @@ function love.draw()
     -- Mensagem de início
     if game_state == states.begin then
         love.graphics.setFont(medium_font)
-        love.graphics.printf("Hello Pong!", 0, 20, virtual.width, 'center')
+        love.graphics.printf("Bem-vindos ao Pong!!", 0, 20, virtual.width, 'center')
+
+        love.graphics.setFont(small_font)
+        love.graphics.printf("Aperte [enter] para jogar", 0, 40, virtual.width, 'center')
     -- Mensagem de 'serve'
     elseif game_state == states.serve then 
         love.graphics.setFont(medium_font)
