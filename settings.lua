@@ -18,6 +18,7 @@ settings = {
         height = 5
     },
     states = {
+        menu = '0',
         begin = 'a',
         playing = 'b',
         serve = 'c',

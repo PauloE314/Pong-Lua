@@ -12,6 +12,7 @@ push = require("libs/push")
 -- Importação de entidades
 require "entities/paddle"
 require "entities/ball"
+require "entities/menu"
 
 -- Dimensões
 real = settings.screen.real
@@ -49,6 +50,12 @@ function love.load()
     big_font = love.graphics.setNewFont('resources/font - 8 bits.TTF', 24)
     large_font = love.graphics.setNewFont('resources/font - 8 bits.TTF', 32)
 
+    -- Configurações de cores
+    colors = {
+        setGray = function () love.graphics.setColor(150 / 255, 150 / 255, 150 / 255) end,
+        setWhite = function () love.graphics.setColor(255 / 255, 255 / 255, 255 / 255) end,
+    }
+
     -- Armazena o turno do jogador
     turn = nil
     -- Armazena vencedor
@@ -66,6 +73,11 @@ function love.load()
             resizable = false
         }
     )
+    -- Cria o menu
+    menu = Menu({
+        up_key = 'up',
+        down_key = 'down',
+    })
 
     -- Cria os dois paddles
     paddle_1 = Paddle({
@@ -95,21 +107,25 @@ function love.load()
     })
 
     -- Seta o estado inicial do jogo
-    game_state = states.begin
+    game_state = states.menu
 end
 
 -- Função de update de frames
 function love.update(dt)
     
-    -- Atualiza os paddles
-    paddle_1:update(dt, virtual.height)
-    paddle_2:update(dt, virtual.height)
-    
-    -- Checa os controles de cada um
-    paddle_1:controls(virtual.height)
-    paddle_2:controls(virtual.height)
-
-
+    if game_state == states.menu then
+        -- Controles do menu
+        menu:controls(dt)
+    else
+        -- Atualiza os paddles
+        paddle_1:update(dt, virtual.height)
+        paddle_2:update(dt, virtual.height)
+        
+        -- Checa os controles de cada um
+        paddle_1:controls(virtual.height)
+        paddle_2:controls(virtual.height)
+    end
+        
     if game_state == states.serve then
         -- Checa se o jogo ainda está valendo
         if paddle_1.points >= winning_points then
@@ -195,6 +211,14 @@ function love.keypressed(key)
     if key == 'enter' or key == 'return' then
         if game_state == states.serve or game_state == states.begin then
             game_state = states.playing
+        
+        -- Escolhe um modo de jogo
+        elseif game_state == states.menu then
+            if menu.current_item == 0 then
+                game_state = states.begin
+            else
+
+            end
         -- Reinicia o jogo
         elseif game_state == states.win then
             game_state = states.begin
@@ -215,13 +239,22 @@ function love.draw()
     love.graphics.clear(40 / 255, 45 / 255, 52 / 255, 255 / 255)
 
     -- Renderiza o texto superior
+    -- Renderiza menu
+    if game_state == states.menu then
+
+        love.graphics.setFont(medium_font)
+        love.graphics.printf("Bem-vindos ao Pong!!", 0, 40, virtual.width, 'center')
+
+        menu:render()
     -- Mensagem de início
-    if game_state == states.begin then
+    elseif game_state == states.begin then
         love.graphics.setFont(medium_font)
         love.graphics.printf("Bem-vindos ao Pong!!", 0, 20, virtual.width, 'center')
 
         love.graphics.setFont(small_font)
         love.graphics.printf("Aperte [enter] para jogar", 0, 40, virtual.width, 'center')
+
+        render_game()
     -- Mensagem de 'serve'
     elseif game_state == states.serve then 
         love.graphics.setFont(medium_font)
@@ -229,6 +262,11 @@ function love.draw()
 
         love.graphics.setFont(small_font)
         love.graphics.printf("Aperte [enter] para continuar", 0, 40, virtual.width, 'center')
+
+        render_game()
+
+    elseif game_state == states.playing then
+        render_game()
     -- Mensagem de vitória
     elseif game_state == states.win then
         love.graphics.setFont(big_font)
@@ -236,8 +274,18 @@ function love.draw()
 
         love.graphics.setFont(small_font)
         love.graphics.printf("Aperte [enter] para reiniciar", 0, 50, virtual.width, 'center')
+
+        render_game()
     end
 
+    -- Fecha a renderização retro
+    push:apply('end')
+end
+
+
+
+
+function render_game() 
     -- Renderiza a pontuação
     love.graphics.setFont(large_font)
 
@@ -252,7 +300,4 @@ function love.draw()
     -- Renderiza paddles
     paddle_1:render()
     paddle_2:render()
-    
-    -- Fecha a renderização retro
-    push:apply('end')
 end
